@@ -1,0 +1,111 @@
+# Welcome to Serverless!
+#
+# This file is the main config file for your service.
+# It's very minimal at this point and uses default values.
+# You can always add more config options for more control.
+# We've included some commented out config examples here.
+# Just uncomment any of them to get that config option.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+#
+# Happy Coding!
+
+service: billing-api # NOTE: update this with your service name
+
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+# frameworkVersion: "=X.X.X"
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  adminUserPoolId: us-east-1_vLfOuHEEO
+  stage: prod
+  environment:
+    stage: ${self:provider.stage}
+
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:ListBucket"
+      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
+    - Effect: "Allow"
+      Action:
+        - "s3:PutObject"
+      Resource:
+        Fn::Join:
+          - ""
+          - - "arn:aws:s3:::"
+            - "Ref" : "ServerlessDeploymentBucket"
+            - "/*"
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+      Resource: "arn:aws:dynamodb:us-east-1:891335278704:table/elections"
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+      Resource: "arn:aws:dynamodb:us-east-1:891335278704:table/forms"
+    - Effect: Allow
+      Action:
+        - "dynamodb:DescribeStream"
+        - "dynamodb:GetRecords"
+        - "dynamodb:GetShardIterator"
+        - "dynamodb:ListStreams"
+        - "logs:CreateLogGroup"
+        - "logs:CreateLogStream"
+        - "logs:PutLogEvents"
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+      Resource: "arn:aws:dynamodb:us-east-1:891335278704:table/elections"
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+      Resource: "arn:aws:dynamodb:us-east-1:891335278704:table/forms/index/*"
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:Query
+      Resource: "arn:aws:dynamodb:us-east-1:891335278704:table/nvUsage"
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:Query
+      Resource: "arn:aws:dynamodb:us-east-1:891335278704:table/nrUsage"
+  
+
+functions:
+  netvoteUsageStream:
+    handler: usage/usage-stream-votes.update
+    events:
+      - stream: arn:aws:dynamodb:us-east-1:891335278704:table/votes/stream/2018-10-20T14:34:02.097
+
+  netrosaUsageStream:
+    handler: usage/usage-stream-submissions.update
+    events:
+      - stream: arn:aws:dynamodb:us-east-1:891335278704:table/formSubmissions/stream/2018-12-04T16:56:03.219
+
+  apiUsageSearch:
+    handler: usage/usage-api.search
+    events:
+      - http:
+          path: /{service}/usage/detail
+          method: get
+          cors: true
+          authorizer:
+            name: authorizer
+            arn: arn:aws:cognito-idp:us-east-1:891335278704:userpool/${self:provider.adminUserPoolId}
+
+  apiUsageTimeReport:
+    handler: usage/usage-api.timeReport
+    events:
+      - http:
+          path: /{service}/usage/report/time
+          method: get
+          cors: true
+          authorizer:
+            name: authorizer
+            arn: arn:aws:cognito-idp:us-east-1:891335278704:userpool/${self:provider.adminUserPoolId}
