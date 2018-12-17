@@ -82,6 +82,31 @@ provider:
       Resource: "arn:aws:dynamodb:us-east-1:891335278704:table/tenants"  
 
 functions:
+  stripeCallback:
+    handler: stripe/api.callback
+    environment:
+      stripeSecretKey: ${env:STRIPE_API_SECRET_KEY}
+      stripeSigningSecret: ${env:STRIPE_SIGNING_SECRET}
+    events:
+      - http:
+          path: /stripe/callback
+          method: post
+          cors: true
+
+  stripePlansList:
+    handler: stripe/api.planList
+    environment:
+      stripeSecretKey: ${env:STRIPE_API_SECRET_KEY}
+      stripeSigningSecret: ${env:STRIPE_SIGNING_SECRET}
+    events:
+      - http:
+          path: /stripe/plans
+          method: get
+          cors: true
+          authorizer:
+            name: authorizer
+            arn: arn:aws:cognito-idp:us-east-1:891335278704:userpool/${self:provider.adminUserPoolId}
+
   setPaymentMethod:
     handler: customer/payment-method.save
     environment:
