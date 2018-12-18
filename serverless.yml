@@ -79,13 +79,14 @@ provider:
       Action:
         - dynamodb:GetItem
         - dynamodb:UpdateItem
+        - dynamodb:Scan
       Resource: "arn:aws:dynamodb:us-east-1:891335278704:table/tenants"  
 
 functions:
   stripeCallback:
     handler: stripe/api.callback
     environment:
-      stripeSecretKey: ${env:STRIPE_API_SECRET_KEY}
+      STRIPE_API_SECRET_KEY: ${env:STRIPE_API_SECRET_KEY}
       stripeSigningSecret: ${env:STRIPE_SIGNING_SECRET}
     events:
       - http:
@@ -93,11 +94,18 @@ functions:
           method: post
           cors: true
 
+  stripeUsageReporting:
+    handler: stripe/report-usage.report
+    timeout: 600
+    environment:
+      STRIPE_API_SECRET_KEY: ${env:STRIPE_API_SECRET_KEY}
+    events:
+      - schedule: cron(0 0 * * ? *)
+
   stripePlansList:
     handler: stripe/api.planList
     environment:
-      stripeSecretKey: ${env:STRIPE_API_SECRET_KEY}
-      stripeSigningSecret: ${env:STRIPE_SIGNING_SECRET}
+      STRIPE_API_SECRET_KEY: ${env:STRIPE_API_SECRET_KEY}
     events:
       - http:
           path: /stripe/plans
@@ -111,7 +119,7 @@ functions:
     handler: stripe/api.setPlans
     timeout: 30
     environment:
-      stripeSecretKey: ${env:STRIPE_API_SECRET_KEY}
+      STRIPE_API_SECRET_KEY: ${env:STRIPE_API_SECRET_KEY}
     events:
       - http:
           path: /stripe/subscription
@@ -124,7 +132,7 @@ functions:
   setPaymentMethod:
     handler: customer/payment-method.save
     environment:
-      stripeSecretKey: ${env:STRIPE_API_SECRET_KEY}
+      STRIPE_API_SECRET_KEY: ${env:STRIPE_API_SECRET_KEY}
     events:
       - http:
           path: /payment/method

@@ -1,4 +1,4 @@
-var stripe = require("stripe")(process.env.stripeSecretKey);
+var stripe = require("stripe")(process.env.STRIPE_API_SECRET_KEY);
 const tenants = require("../lib/tenants")
 const Joi = require("joi")
 var utils = require("../lib/utils")
