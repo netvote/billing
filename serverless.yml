@@ -107,6 +107,20 @@ functions:
             name: authorizer
             arn: arn:aws:cognito-idp:us-east-1:891335278704:userpool/${self:provider.adminUserPoolId}
 
+  setSubscription:
+    handler: stripe/api.setPlans
+    timeout: 30
+    environment:
+      stripeSecretKey: ${env:STRIPE_API_SECRET_KEY}
+    events:
+      - http:
+          path: /stripe/subscription
+          method: put
+          cors: true
+          authorizer:
+            name: authorizer
+            arn: arn:aws:cognito-idp:us-east-1:891335278704:userpool/${self:provider.adminUserPoolId}
+
   setPaymentMethod:
     handler: customer/payment-method.save
     environment:

@@ -1,11 +1,6 @@
 var stripe = require("stripe")(process.env.STRIPE_API_SECRET_KEY);
 
 
-
-const supportMetadata = {
-    "productId": "Support Package"
-}
-
 let support = {
     product: {
         name: "Support Package",
@@ -22,7 +17,7 @@ let support = {
             currency: "usd",
             metadata: {
                 "productId": "Support Package",
-                "monthlyPrice": "$0.00"
+                "groupId": "Developer"
             }
         },
         {
@@ -32,7 +27,7 @@ let support = {
             currency: "usd",
             metadata: {
                 "productId": "Support Package",
-                "monthlyPrice": "$79.00"
+                "groupId": "Professional"
             }
         },
         {
@@ -42,7 +37,7 @@ let support = {
             currency: "usd",
             metadata: {
                 "productId": "Support Package",
-                "monthlyPrice": "$699.00"
+                "groupId": "Premium"
             }
         }
     ]
@@ -65,8 +60,7 @@ let transactionPackage = {
             currency: "usd",
             metadata: {
                 "productId": "Usage Plan",
-                "planGroup": "Developer",
-                "monthlyPrice": "$0.00"
+                "groupId": "Developer",
             }
         },
         {
@@ -76,8 +70,7 @@ let transactionPackage = {
             currency: "usd",
             metadata: {
                 "productId": "Usage Plan",
-                "planGroup": "Bronze",
-                "monthlyPrice": "$75.00"
+                "groupId": "Bronze",
             }
         },
         {
@@ -87,8 +80,7 @@ let transactionPackage = {
             currency: "usd",     
             metadata: {
                 "productId": "Usage Plan",
-                "planGroup": "Silver",
-                "monthlyPrice": "$225.00"
+                "groupId": "Silver",
             }
         },
         {
@@ -98,8 +90,7 @@ let transactionPackage = {
             currency: "usd",
             metadata: {
                 "productId": "Usage Plan",
-                "planGroup": "Gold",
-                "monthlyPrice": "$500.00"
+                "groupId": "Gold",
             }
         },
     ]
@@ -123,7 +114,7 @@ let transactionPlan = {
             currency: "usd",
             metadata: {
                 "productId": "Usage Plan",
-                "planGroup": "Developer",
+                "groupId": "Developer",
                 "usagePrice": "$0.10"
             },
             tiers: [
@@ -146,8 +137,9 @@ let transactionPlan = {
             currency: "usd",
             metadata: {
                 "productId": "Usage Plan",
-                "planGroup": "Bronze",
-                "usagePrice": "$0.08"
+                "groupId": "Bronze",
+                "usagePrice": "$0.08",
+                "includedTx": "1000"
             },
             tiers: [
                 {
@@ -173,8 +165,9 @@ let transactionPlan = {
             currency: "usd",            
             metadata: {
                 "productId": "Usage Plan",
-                "planGroup": "Silver",
-                "usagePrice": "$0.05"
+                "groupId": "Silver",
+                "usagePrice": "$0.05",
+                "includedTx": "5000"
             },
             tiers: [
                 {
@@ -200,8 +193,9 @@ let transactionPlan = {
             currency: "usd",
             metadata: {
                 "productId": "Usage Plan",
-                "planGroup": "Gold",
-                "usagePrice": "$0.03"
+                "groupId": "Gold",
+                "usagePrice": "$0.03",
+                "includedTx": "20000"
             },
             tiers: [
                 {
@@ -221,6 +215,44 @@ let transactionPlan = {
     ]
 }
 
+// avoids floating points
+const toUsd = (amountCents) => {
+    let amountStr = `${amountCents}`
+    let dollars = amountStr.substring(0, amountStr.length - 2) || "0";
+    let cents = amountStr.substring(amountStr.length - 2) || "00";
+    if(cents.length == 1){
+        cents = `0${cents}`
+    }
+    return `$${dollars}.${cents}`;
+}
+
+const getCatalogSummary = async () => {
+    let plans = await stripe.plans.list({ limit: 100 });
+    let items = {}
+
+    plans.data.forEach((p) => {
+        let groupId = p.metadata.groupId || p.nickname;
+        let productId = p.metadata.productId;
+        if (!items[productId]) {
+            items[productId] = {}
+        }
+        if (!items[productId][groupId]){
+            items[productId][groupId] = {}
+        }
+       
+        if (p.usage_type === "licensed") {
+            items[productId][groupId].monthlyPrice = toUsd(p.amount);
+            items[productId][groupId].planId = p.id;
+        }
+        if (p.usage_type === "metered") {
+            items[productId][groupId].usagePrice = p.metadata.usagePrice;
+            items[productId][groupId].includedTx = p.metadata.includedTx || "0";
+        }
+    })
+
+    return items
+}
+
 
 const initializePackage = async (package) => {
     let product = await stripe.products.create(package.product);
@@ -231,32 +263,6 @@ const initializePackage = async (package) => {
     });
 }
 
-const getCatalogSummary = async () => {
-    let plans = await stripe.plans.list({limit: 100});
-    let items = {}
-
-    plans.data.forEach((p) => {
-        let groupId = p.metadata.planGroup || p.nickname;
-        let productId = p.metadata.productId;
-        if(!items[productId]){
-            items[productId] = {}
-        } 
-        if(!items[productId][groupId]){
-            items[productId][groupId] = {
-                plans: [],
-            }
-        }
-        if(p.metadata.monthlyPrice){
-            items[productId][groupId].monthlyPrice =  p.metadata.monthlyPrice
-        }
-        if(p.metadata.usagePrice){
-            items[productId][groupId].usagePrice =  p.metadata.usagePrice
-        }
-        items[productId][groupId].plans.push(p.id);
-    })
-
-    return items
-}
 const snooze = ms => new Promise(resolve => setTimeout(resolve, ms)); 
 
 const setupCatalog = async () => {
