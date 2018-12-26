@@ -17,7 +17,8 @@ let support = {
             currency: "usd",
             metadata: {
                 "productId": "Support Package",
-                "groupId": "Developer"
+                "groupId": "Developer",
+                "available": "true"
             }
         },
         {
@@ -27,7 +28,8 @@ let support = {
             currency: "usd",
             metadata: {
                 "productId": "Support Package",
-                "groupId": "Professional"
+                "groupId": "Professional",
+                "available": "true"
             }
         },
         {
@@ -37,7 +39,8 @@ let support = {
             currency: "usd",
             metadata: {
                 "productId": "Support Package",
-                "groupId": "Premium"
+                "groupId": "Premium",
+                "available": "true"
             }
         }
     ]
@@ -61,36 +64,40 @@ let transactionPackage = {
             metadata: {
                 "productId": "Usage Plan",
                 "groupId": "Developer",
+                "available": "true"
             }
         },
         {
-            amount: 7500,
+            amount: 7900,
             interval: "month",
             nickname: "Bronze",
             currency: "usd",
             metadata: {
                 "productId": "Usage Plan",
                 "groupId": "Bronze",
+                "available": "true"
             }
         },
         {
-            amount: 22500,
+            amount: 24900,
             interval: "month",
             nickname: "Silver",
             currency: "usd",     
             metadata: {
                 "productId": "Usage Plan",
                 "groupId": "Silver",
+                "available": "true"
             }
         },
         {
-            amount: 50000,
+            amount: 49900,
             interval: "month",
             nickname: "Gold",
             currency: "usd",
             metadata: {
                 "productId": "Usage Plan",
                 "groupId": "Gold",
+                "available": "true"
             }
         },
     ]
@@ -110,12 +117,13 @@ let transactionPlan = {
             interval: "month",
             nickname: "Developer",
             billing_scheme: "tiered",
-            tiers_mode: "volume",
+            tiers_mode: "graduated",
             currency: "usd",
             metadata: {
                 "productId": "Usage Plan",
                 "groupId": "Developer",
-                "usagePrice": "$0.10"
+                "usagePrice": "$0.10",
+                "available": "true"
             },
             tiers: [
                 {
@@ -133,21 +141,18 @@ let transactionPlan = {
             interval: "month",
             nickname: "Bronze",
             billing_scheme: "tiered",
-            tiers_mode: "volume",
+            tiers_mode: "graduated",
             currency: "usd",
             metadata: {
                 "productId": "Usage Plan",
                 "groupId": "Bronze",
                 "usagePrice": "$0.08",
-                "includedTx": "1000"
+                "includedTx": "1000",
+                "available": "true"
             },
             tiers: [
                 {
-                    up_to: 100,
-                    unit_amount: 0
-                },
-                {
-                    up_to: 1000,
+                    up_to: 1100,
                     unit_amount: 0
                 },
                 {
@@ -161,21 +166,18 @@ let transactionPlan = {
             interval: "month",
             nickname: "Silver",
             billing_scheme: "tiered",
-            tiers_mode: "volume",
+            tiers_mode: "graduated",
             currency: "usd",            
             metadata: {
                 "productId": "Usage Plan",
                 "groupId": "Silver",
                 "usagePrice": "$0.05",
-                "includedTx": "5000"
+                "includedTx": "5000",
+                "available": "true"
             },
             tiers: [
                 {
-                    up_to: 100,
-                    unit_amount: 0
-                },
-                {
-                    up_to: 5000,
+                    up_to: 5100,
                     unit_amount: 0
                 },
                 {
@@ -189,21 +191,18 @@ let transactionPlan = {
             interval: "month",
             nickname: "Gold",
             billing_scheme: "tiered",
-            tiers_mode: "volume",
+            tiers_mode: "graduated",
             currency: "usd",
             metadata: {
                 "productId": "Usage Plan",
                 "groupId": "Gold",
                 "usagePrice": "$0.03",
-                "includedTx": "20000"
+                "includedTx": "20000",
+                "available": "true"
             },
             tiers: [
                 {
-                    up_to: 100,
-                    unit_amount: 0
-                },
-                {
-                    up_to: 20000,
+                    up_to: 20100,
                     unit_amount: 0
                 },
                 {

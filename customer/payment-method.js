@@ -22,6 +22,7 @@ module.exports.save = async (event, context) => {
             message: "Payment method updated"
         })
     } catch(e) {
+        console.error(e);
         return utils.error(400, {
             code: 400,
             errorType: "VALIDATION",

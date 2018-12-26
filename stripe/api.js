@@ -23,7 +23,6 @@ const printObj = (obj) => {
 const stripeEventHandlers = {
     // checkout process completed successfully
     "checkout_beta.session_succeeded": async (stripeEvt) => {
-        printObj(stripeEvt);
         let tenantId = stripeEvt.data.object.client_reference_id;
         let subId = stripeEvt.data.object.subscription;
         if (!tenantId) {
